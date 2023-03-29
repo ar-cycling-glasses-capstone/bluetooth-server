@@ -3,53 +3,66 @@
 import bluetooth
 import datetime
 
-# Define the Bluetooth server parameters
-server_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-port = 1  # This should match the port number on the client device
-server_socket.bind(("", port))
-server_socket.listen(1)
-connected = False;
+import json
 
-# Open a log file to write the received data
-log_file = open("bluetooth_log.txt", "a")
+class Server:
+    def get_info(self):
+        return self.data
 
-while True:
-    try:
-        if (connected == False):
-            print("Waiting for connection...")
+    self.data = []
 
-            # Wait for a client to connect
-            client_socket, address = server_socket.accept()
-            # client_socket.setblocking(False)
-            print("Connected to", address)
-            connected = True
-        
-        
-        # Receive data from the client
-        data = client_socket.recv(1024)
-        if not data:
-            break
+    # Define the Bluetooth server parameters
+    server_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+    port = 1  # This should match the port number on the client device
+    server_socket.bind(("", port))
+    server_socket.listen(1)
+    connected = False;
 
-        # Log the received data with timestamp
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-        log_file.write(f"{timestamp}: {data.decode()}\n")
-        log_file.flush()  # Force write to file
+    # Open a log file to write the received data
+    log_file = open("bluetooth_log.txt", "a")
 
-        # Send an acknowledgement back to the client
-        ack = "Received: " + data.decode()
-        client_socket.send(ack.encode())
+    while True:
+        try:
+            if (connected == False):
+                print("Waiting for connection...")
 
-    except KeyboardInterrupt:
-        print("\nClosing Bluetooth Server...")
-        log_file.close()
-        client_socket.close()
-        server_socket.close()
-        break;
-    except bluetooth.btcommon.BluetoothError: # User disconnected from Bluetooth 
-        print("Disconnected")
-        connected = False;
+                # Wait for a client to connect
+                client_socket, address = server_socket.accept()
+                # client_socket.setblocking(False)
+                print("Connected to", address)
+                connected = True
+            
+            
+            # Receive data from the client
+            data = client_socket.recv(1024)
+            
+            
+            if not data:
+                break
 
-# Close the log file and the Bluetooth sockets
-# log_file.close()
-# client_socket.close()
-# server_socket.close()
+            # Update class variable to prepare for retrieval
+            self.data = json.loads(data.decode())
+
+            # Log the received data with timestamp
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            log_file.write(f"{timestamp}: {data.decode()}\n")
+            log_file.flush()  # Force write to file
+
+            # Send an acknowledgement back to the client
+            ack = "Received: " + data.decode()
+            client_socket.send(ack.encode())
+
+        except KeyboardInterrupt:
+            print("\nClosing Bluetooth Server...")
+            log_file.close()
+            client_socket.close()
+            server_socket.close()
+            break;
+        except bluetooth.btcommon.BluetoothError: # User disconnected from Bluetooth 
+            print("Disconnected")
+            connected = False;
+
+    # Close the log file and the Bluetooth sockets
+    # log_file.close()
+    # client_socket.close()
+    # server_socket.close()
