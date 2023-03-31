@@ -2,6 +2,8 @@
 
 import bluetooth
 import datetime
+import subprocess
+import uuid
 
 import json
 
@@ -12,18 +14,24 @@ class Server:
     def __init__(self):
         self.data = []
 
+        # Make the Raspberry Pi discoverable
+        subprocess.call(['sudo', 'hciconfig', 'hci0', 'piscan'])
+
         self.main_loop()
     
     def main_loop(self):
         # Define the Bluetooth server parameters
         server_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         port = 1  # This should match the port number on the client device
-        server_socket.bind(("", port))
+        # server_socket.bind(("", port))
+        server_socket.bind(("", bluetooth.PORT_ANY))
         server_socket.listen(1)
         connected = False;
 
+
         # Open a log file to write the received data
         log_file = open("bluetooth_log.txt", "a")
+
         
         while True:
             try:
