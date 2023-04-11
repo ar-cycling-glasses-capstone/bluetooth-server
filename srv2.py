@@ -4,6 +4,10 @@ import subprocess
 from bluetooth import BluetoothSocket, RFCOMM
 import time
 
+
+def get_data():
+    return 
+
 def handle_data(data):
     if "timer" in data:
         print(f"Timer: {data['timer']}")
